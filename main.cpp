@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <algorithm>
 
 #define ROWS 6
 #define COLOMS 7
 #define AI 1
 #define HUMAN -1
 #define NONE 0
+#define DEPTH 4
 
 const int board_size = ROWS * COLOMS;
 
@@ -115,7 +117,7 @@ private:
 
 public:
 
-    void undo_move(bool our_move,char colom){  //  отменяет ход(меняет доску в обратное от хода положение) по сути просто убирает верхнюю фишку в строке
+    void undo_move(char colom){  //  отменяет ход(меняет доску в обратное от хода положение) по сути просто убирает верхнюю фишку в строке
 		int i;
 		for (i = ROWS - 1; i >= 0; --i) {
 			if (board[i * COLOMS + colom] != NONE)
@@ -124,9 +126,9 @@ public:
 		board[i * COLOMS + colom] = NONE;
 	}   
     void print_board(){} // КРАСИВО печатает доску на консоль
-
-
 };
+
+game * Connect4 = new game();
 
 class state{
 public:
@@ -153,10 +155,84 @@ public:
 
 };
 
+int alphabeta(int depth, int alpha, int beta, bool our_move) {
+	if (depth == 0)
+		return Connect4->calculate_heuristics();
 
+	int value;
+	if (our_move)
+	{
+		value = INT_MIN;
+
+		for (int i = 0; i < COLOMS - 1; ++i) {
+			if (!Connect4->validate_move(i))
+				continue;
+
+			if (Connect4->do_move(true, i) == AI)
+				value = std::max(value, Connect4->calculate_heuristics());		
+			else 
+				value = std::max(value, alphabeta(depth - 1, alpha, beta, false));
+
+				Connect4->undo_move(i);
+				alpha = std::max(alpha, value);
+				if (alpha >= beta)
+					break;
+		}
+			return value;
+	}
+	else {
+		value = INT_MAX;
+
+		for (int i = 0; i < COLOMS - 1; ++i) {
+			if (!Connect4->validate_move(i))
+				continue;
+
+			if (Connect4->do_move(false, i) == HUMAN)
+				value = std::max(value, Connect4->calculate_heuristics());
+			else
+				value = std::max(value, alphabeta(depth - 1, alpha, beta, true));
+
+			Connect4->undo_move(i);
+			beta = std::min(beta, value);
+			if (alpha >= beta)
+				break;
+		}
+		return value;
+	}
+}
+
+int calculate_move() {
+	int value = INT_MIN;
+	bool flag = false;
+	int alpha = INT_MIN;
+	int beta = INT_MAX;
+	int move = -1;
+
+	for (int i = 0; i < COLOMS - 1; ++i) {
+		if (!Connect4->validate_move(i))
+			continue;
+
+		if (Connect4->do_move(true, i) == AI) {
+			Connect4->undo_move(i);
+			return i;
+		}
+		else {
+			int r = alphabeta(DEPTH, alpha, beta, false);
+			if (r  >= value) {
+				value = r;
+				move = i;
+			}
+		}
+
+		Connect4->undo_move(i);
+		alpha = std::max(alpha, value);
+		if (alpha >= beta && move != -1)
+			break;
+	}
+	return move;
+}
 
 int main()
 {
-
     return 0;
 }
