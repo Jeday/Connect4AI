@@ -2,6 +2,9 @@
 #include <vector>
 #include <stack>
 #include <algorithm>
+#include <string>
+#include <stdexcept>
+
 
 #define ROWS 6
 #define COLOMS 7
@@ -9,6 +12,7 @@
 #define HUMAN -1
 #define NONE 0
 #define DEPTH 4
+
 
 const int board_size = ROWS * COLOMS;
 
@@ -22,7 +26,7 @@ public:
 		board.resize(board_size, NONE);
 	}
 
-    bool validate_move(int colom){    // проверяет что можно совершить ход в  colom, т.е. столбец не переполнен
+    bool validate_move(signed char colom){    // проверяет что можно совершить ход в  colom, т.е. столбец не переполнен
 		return (board[board_size - COLOMS + colom] == NONE);
 	} 
 
@@ -212,11 +216,56 @@ signed char calculate_move() {
 
 void game_cycle(){
 
+  while(true){
+    bool is_valid = false;
+    for(signed char i = 0; i<COLOMS; i++)
+        is_valid = is_valid || Connect4->validate_move(i);
+    if(!is_valid){
+        std::cout<<"IT'S A DRAW"<<std::endl;
+        break;
+    }
 
+    int move;
+    while(true){
+        std::string s;
+        std::cin >> s;
+        try{
+            move = std::stoi(s);
+            if(move < 1 || move >COLOMS || Connect4->validate_move((signed char)(move-1)))
+                throw std::invalid_argument("invalid move");
+             break;
+        }
+        catch(std::logic_error){
+            std::cout<<"invalid input"<<std::endl;
+            continue;
+        }
+    }
+    signed char colom = (signed char)move -1 ;
+    if( Connect4->do_move(false,colom) == HUMAN){
+        Connect4->print_board();
+        std::cout<<"HUMAN WON"<<std::endl;
+        break;
+    }
+    Connect4->print_board();
+
+    colom = calculate_move();
+    if(colom == -1){
+        std::cout<<"IT'S A DRAW"<<std::endl;
+        break;
+    }
+    if( Connect4->do_move(true,colom) == AI){
+        Connect4->print_board();
+        std::cout<<"AI WON HAHAHAH"<<std::endl;
+        break;
+    }
+    Connect4->print_board();
+
+  }
 }
 
 int main()
 {
     Connect4 = new game();
+    game_cycle();
     return 0;
 }
