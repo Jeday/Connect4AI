@@ -112,6 +112,7 @@ private:
 		if (cnt >= 3)
 			return true;
 		cnt = 0;
+        return false;
 	}
 
 
@@ -130,30 +131,7 @@ public:
 
 game * Connect4 = new game();
 
-class state{
-public:
-    int depth;
-    int alpha;
-    bool alpha_set;
-    int beta;
-    bool beta_set;
-    bool player_type;
 
-    state(){
-        depth = 0;
-        alpha_set = false;
-        beta_set = false;
-        player_type = false;
-    }
-    state(int d,bool p,bool as,bool bs){
-        depth = d;
-        player_type = p;
-        alpha_set =as;
-        beta_set = bs;
-    }
-
-
-};
 
 int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	if (depth == 0)
@@ -203,7 +181,6 @@ int alphabeta(int depth, int alpha, int beta, bool our_move) {
 
 int calculate_move() {
 	int value = INT_MIN;
-	bool flag = false;
 	int alpha = INT_MIN;
 	int beta = INT_MAX;
 	int move = -1;
