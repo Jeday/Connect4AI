@@ -13,13 +13,53 @@
 #define NONE 0
 #define DEPTH 4
 
+#define UPRIGHT 1
+#define UPLEFT 2
+#define UP 3
+#define RIGHT 4
 
 const int board_size = ROWS * COLOMS;
 
 class game{
+private:
+    int count_win_lines_AI =0;
+    int count_win_lines_HUMAN = 0;
+    void work_line(int i,int j,signed char TYPE){
+        int coords = i*COLOMS+j;
+        int HUM = 0;
+        int CPU = 0;
+
+            for(i = 0; i<4;i++){
+               if(board[coords] == HUMAN)
+                   HUM++;
+               else if(board[coords] == AI)
+                   CPU++;
+               switch (TYPE) {
+               case UPRIGHT:
+                    coords+=COLOMS+1;
+                   break;
+               case UPLEFT:
+                   coords+=COLOMS-1;
+                   break;
+               case UP:
+                   coords+=COLOMS;
+                   break;
+               default:
+               case RIGHT:
+                   coords+=1;
+                   break;
+               }
+            }
+            if(HUM != 0 && CPU == 0)
+                    count_win_lines_HUMAN++;
+            else if(HUM == 0 && CPU != 0)
+                count_win_lines_AI++;
+
+    }
 public:
 
     std::vector<signed char> board;
+
 
 
 	game() {
@@ -30,7 +70,30 @@ public:
 		return (board[board_size - COLOMS + colom] == NONE);
 	} 
 
-    int calculate_heuristics(){} // высчитывает эвристику для текущего располжения доски
+    int calculate_heuristics(){// высчитывает эвристику для текущего располжения доски
+         count_win_lines_AI =0;
+         count_win_lines_HUMAN = 0;
+
+        for(int i=0;i<=ROWS-4;i++)
+            for(int j=0;j<=COLOMS -4;j++)
+                work_line(i,j,UPRIGHT);
+
+
+        for(int i=0;i<=ROWS-4;i++)
+            for(int j=COLOMS-4;j<=COLOMS-1;j++)
+                work_line(i,j,UPLEFT);
+
+        for(int i=0;i<=ROWS-4;i++)
+            for(int j=0;j<=COLOMS-1;j++)
+                work_line(i,j,UP);
+
+        for(int i=0;i<=ROWS-1;i++)
+            for(int j=0;j<=COLOMS-4;j++)
+                work_line(i,j,RIGHT);
+
+        return count_win_lines_AI - count_win_lines_HUMAN;
+
+    }
 
     signed char do_move(bool our_move,signed char colom){   // применяет ход(меняет доску) для нас(our_move == true) или для противника, возвращает AI(выграли мы),HUMAN(выграл Пучкин),NONE(не выигрышный ход)
 		int i;
