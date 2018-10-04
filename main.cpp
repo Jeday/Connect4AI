@@ -27,7 +27,8 @@ public:
 	} 
 
     int calculate_heuristics(){} // высчитывает эвристику для текущего располжения доски
-    signed char do_move(bool our_move,char colom){   // применяет ход(меняет доску) для нас(our_move == true) или для противника, возвращает AI(выграли мы),HUMAN(выграл Пучкин),NONE(не выигрышный ход)
+
+    signed char do_move(bool our_move,signed char colom){   // применяет ход(меняет доску) для нас(our_move == true) или для противника, возвращает AI(выграли мы),HUMAN(выграл Пучкин),NONE(не выигрышный ход)
 		int i;
 		for (i = ROWS - 1; i >= 0; --i) {
 			if (board[i * COLOMS + colom] != NONE)
@@ -110,15 +111,15 @@ private:
 				break;
 		}
 		if (cnt >= 3)
-			return true;
-		cnt = 0;
+            return true;
+
         return false;
 	}
 
 
 public:
 
-    void undo_move(char colom){  //  отменяет ход(меняет доску в обратное от хода положение) по сути просто убирает верхнюю фишку в строке
+    void undo_move(signed char colom){  //  отменяет ход(меняет доску в обратное от хода положение) по сути просто убирает верхнюю фишку в строке
 		int i;
 		for (i = ROWS - 1; i >= 0; --i) {
 			if (board[i * COLOMS + colom] != NONE)
@@ -129,7 +130,7 @@ public:
     void print_board(){} // КРАСИВО печатает доску на консоль
 };
 
-game * Connect4 = new game();
+game * Connect4;
 
 
 
@@ -142,7 +143,7 @@ int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	{
 		value = INT_MIN;
 
-		for (int i = 0; i < COLOMS - 1; ++i) {
+        for (signed char  i = 0; i < COLOMS - 1; ++i) {
 			if (!Connect4->validate_move(i))
 				continue;
 
@@ -161,7 +162,7 @@ int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	else {
 		value = INT_MAX;
 
-		for (int i = 0; i < COLOMS - 1; ++i) {
+        for (signed char i = 0; i < COLOMS - 1; ++i) {
 			if (!Connect4->validate_move(i))
 				continue;
 
@@ -179,13 +180,13 @@ int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	}
 }
 
-int calculate_move() {
+signed char calculate_move() {
 	int value = INT_MIN;
 	int alpha = INT_MIN;
 	int beta = INT_MAX;
-	int move = -1;
+    signed char  move = -1;
 
-	for (int i = 0; i < COLOMS - 1; ++i) {
+    for (signed char i = 0; i < COLOMS - 1; ++i) {
 		if (!Connect4->validate_move(i))
 			continue;
 
@@ -209,7 +210,13 @@ int calculate_move() {
 	return move;
 }
 
+void game_cycle(){
+
+
+}
+
 int main()
 {
+    Connect4 = new game();
     return 0;
 }
