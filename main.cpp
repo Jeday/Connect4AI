@@ -11,7 +11,7 @@
 #define AI 1
 #define HUMAN -1
 #define NONE 0
-#define DEPTH 4
+#define DEPTH 6
 
 #define UPRIGHT 1
 #define UPLEFT 2
@@ -34,6 +34,8 @@ private:
                    HUM++;
                else if(board[coords] == AI)
                    CPU++;
+
+
                switch (TYPE) {
                case UPRIGHT:
                     coords+=COLOMS+1;
@@ -91,7 +93,7 @@ public:
             for(int j=0;j<=COLOMS-4;j++)
                 work_line(i,j,RIGHT);
 
-        return count_win_lines_AI - count_win_lines_HUMAN;
+        return  count_win_lines_AI- count_win_lines_HUMAN;
 
     }
 
@@ -194,7 +196,31 @@ public:
 		}
 		board[i * COLOMS + colom] = NONE;
 	}   
-    void print_board(){} // КРАСИВО печатает доску на консоль
+    void print_board(){
+        for(int i = ROWS-1; i>=0;--i){
+            for(int j = 0; j<COLOMS; ++j){
+                char c;
+                switch ( board[i*COLOMS+j]) {
+                default:
+                case NONE:
+                     c = ' ';
+                    break;
+                case HUMAN:
+                     c = 'X';
+                    break;
+                case AI:
+                     c = 'O';
+                    break;
+                }
+                std::cout<<"|"<<c<<"|";
+            }
+           std::cout<<std::endl;
+
+        }
+        for(int j = 0; j<COLOMS; ++j)
+            std::cout<<"|"<<j+1<<"|";
+        std::cout<<std::endl;
+    } // КРАСИВО печатает доску на консоль
 };
 
 game * Connect4;
@@ -210,38 +236,38 @@ int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	{
 		value = INT_MIN;
 
-        for (signed char  i = 0; i < COLOMS - 1; ++i) {
+        for (signed char  i = 0; i < COLOMS ; ++i) {
 			if (!Connect4->validate_move(i))
 				continue;
 
 			if (Connect4->do_move(true, i) == AI)
-				value = std::max(value, Connect4->calculate_heuristics());		
+                value = std::max(value,Connect4->calculate_heuristics());
 			else 
 				value = std::max(value, alphabeta(depth - 1, alpha, beta, false));
 
 				Connect4->undo_move(i);
 				alpha = std::max(alpha, value);
-				if (alpha >= beta)
-					break;
+                if (alpha >= beta)
+                    break;
 		}
 			return value;
 	}
 	else {
 		value = INT_MAX;
 
-        for (signed char i = 0; i < COLOMS - 1; ++i) {
+        for (signed char i = 0; i < COLOMS; ++i) {
 			if (!Connect4->validate_move(i))
 				continue;
 
 			if (Connect4->do_move(false, i) == HUMAN)
-				value = std::max(value, Connect4->calculate_heuristics());
+                value = std::min(value, Connect4->calculate_heuristics());
 			else
-				value = std::max(value, alphabeta(depth - 1, alpha, beta, true));
+                value = std::min(value, alphabeta(depth - 1, alpha, beta, true));
 
 			Connect4->undo_move(i);
 			beta = std::min(beta, value);
-			if (alpha >= beta)
-				break;
+            if (alpha >= beta)
+                break;
 		}
 		return value;
 	}
@@ -253,7 +279,7 @@ signed char calculate_move() {
 	int beta = INT_MAX;
     signed char  move = -1;
 
-    for (signed char i = 0; i < COLOMS - 1; ++i) {
+    for (signed char i = 0; i < COLOMS; ++i) {
 		if (!Connect4->validate_move(i))
 			continue;
 
@@ -271,7 +297,7 @@ signed char calculate_move() {
 
 		Connect4->undo_move(i);
 		alpha = std::max(alpha, value);
-		if (alpha >= beta && move != -1)
+        if (alpha >= beta)
 			break;
 	}
 	return move;
@@ -290,11 +316,13 @@ void game_cycle(){
 
     int move;
     while(true){
+        Connect4->print_board();
+        std::cout<<"Enter your move:"<<std::endl;
         std::string s;
         std::cin >> s;
         try{
             move = std::stoi(s);
-            if(move < 1 || move >COLOMS || Connect4->validate_move((signed char)(move-1)))
+            if(move < 1 || move >COLOMS || !Connect4->validate_move((signed char)(move-1)))
                 throw std::invalid_argument("invalid move");
              break;
         }
@@ -321,7 +349,7 @@ void game_cycle(){
         std::cout<<"AI WON HAHAHAH"<<std::endl;
         break;
     }
-    Connect4->print_board();
+
 
   }
 }
