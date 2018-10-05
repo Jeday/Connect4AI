@@ -72,22 +72,31 @@ private:
                }
             }
             if(type_of_cell == HUMAN){
-                count_win_lines_HUMAN++;
-                if(count_same == 3  && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
-                   if((NONE_Coords/COLOMS) % 2 == 0)
-                        even_threat_HUMAN++;
-                    else
-                        odd_threat_HUMAN++;
-                    //even_threat_HUMAN++;
+                int d = 1;
+                for(int i = 1; i <count_same; i++)
+                    d*=10;
+                count_win_lines_HUMAN+=d;
+                //                count_win_lines_HUMAN++;
+//                if(count_same == 3  && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
+//                   if((NONE_Coords/COLOMS) % 2 == 0)
+//                        even_threat_HUMAN++;
+//                    else
+//                        odd_threat_HUMAN++;
+//                    //even_threat_HUMAN++;
             }
             else if(type_of_cell == AI){
-                count_win_lines_AI++;
-                if(count_same == 3 && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
-                    if((NONE_Coords/COLOMS) % 2 == 0)
-                        even_threat_AI++;
-                    else
-                        odd_threat_AI++;
-                    //even_threat_AI++;
+
+                int d = 1;
+                for(int i = 1; i <count_same; i++)
+                    d*=10;
+                count_win_lines_AI+=d;
+//                count_win_lines_AI++;
+//                if(count_same == 3 && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
+//                    if((NONE_Coords/COLOMS) % 2 == 0)
+//                        even_threat_AI++;
+//                    else
+//                        odd_threat_AI++;
+//                    //even_threat_AI++;
             }
 
     }
