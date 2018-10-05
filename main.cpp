@@ -11,7 +11,7 @@
 #define AI 1
 #define HUMAN -1
 #define NONE 0
-#define DEPTH 6
+#define DEPTH 8
 
 #define UPRIGHT 1
 #define UPLEFT 2
@@ -21,19 +21,38 @@
 const int board_size = ROWS * COLOMS;
 
 class game{
-private:
+public:
     int count_win_lines_AI =0;
     int count_win_lines_HUMAN = 0;
-    void work_line(int i,int j,signed char TYPE){
-        int coords = i*COLOMS+j;
-        int HUM = 0;
-        int CPU = 0;
+    int even_threat_AI = 0;
+    int odd_threat_AI = 0;
+    int even_threat_HUMAN = 0;
+    int odd_threat_HUMAN = 0;
+private:
 
-            for(i = 0; i<4;i++){
-               if(board[coords] == HUMAN)
-                   HUM++;
-               else if(board[coords] == AI)
-                   CPU++;
+    void work_line(int _i,int j,signed char TYPE){
+        int coords = _i*COLOMS+j;
+        int count_same = 0;
+        signed char type_of_cell = NONE;
+        int NONE_row = -1;
+        int NONE_Coords = -1;
+            for(int i = 0; i<4;i++){
+
+
+                if(board[coords] != NONE){ // находим не пустую клетку
+
+                    if(type_of_cell == NONE)
+                         type_of_cell = board[coords]; // устанавливаем тип линии
+                    else if(type_of_cell != board[coords]){  // если новая клетка не совпадает с типом то прерывание
+                            type_of_cell = NONE; // обнуляем тип клетки
+                            break;
+                    }
+                    count_same++; // новая клетка совпала с типом, увл счетчик
+                }
+                else{
+                    NONE_Coords = coords; // запоминаем ряд постой клетки
+
+                }
 
 
                switch (TYPE) {
@@ -52,10 +71,24 @@ private:
                    break;
                }
             }
-            if(HUM != 0 && CPU == 0)
-                    count_win_lines_HUMAN++;
-            else if(HUM == 0 && CPU != 0)
+            if(type_of_cell == HUMAN){
+                count_win_lines_HUMAN++;
+                if(count_same == 3  && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
+                   if((NONE_Coords/COLOMS) % 2 == 0)
+                        even_threat_HUMAN++;
+                    else
+                        odd_threat_HUMAN++;
+                    //even_threat_HUMAN++;
+            }
+            else if(type_of_cell == AI){
                 count_win_lines_AI++;
+                if(count_same == 3 && (NONE_Coords>=COLOMS) && (board[NONE_Coords-COLOMS] == NONE))
+                    if((NONE_Coords/COLOMS) % 2 == 0)
+                        even_threat_AI++;
+                    else
+                        odd_threat_AI++;
+                    //even_threat_AI++;
+            }
 
     }
 public:
@@ -75,6 +108,10 @@ public:
     int calculate_heuristics(){// высчитывает эвристику для текущего располжения доски
          count_win_lines_AI =0;
          count_win_lines_HUMAN = 0;
+          even_threat_AI = 0;
+          odd_threat_AI = 0;
+          even_threat_HUMAN = 0;
+          odd_threat_HUMAN = 0;
 
         for(int i=0;i<=ROWS-4;i++)
             for(int j=0;j<=COLOMS -4;j++)
@@ -93,8 +130,7 @@ public:
             for(int j=0;j<=COLOMS-4;j++)
                 work_line(i,j,RIGHT);
 
-        return  count_win_lines_AI- count_win_lines_HUMAN;
-
+        return  count_win_lines_AI-count_win_lines_HUMAN;
     }
 
     signed char do_move(bool our_move,signed char colom){   // применяет ход(меняет доску) для нас(our_move == true) или для противника, возвращает AI(выграли мы),HUMAN(выграл Пучкин),NONE(не выигрышный ход)
@@ -123,7 +159,7 @@ private:
 			else
 				break;
 		}
-		for (int i = ind - 1; i%COLOMS != COLOMS - 1; --i) {   // left horizontal
+        for (int i = ind - 1; i>=0 && i%COLOMS != COLOMS - 1; --i) {   // left horizontal
 			if (board[i] == type_pl)
 				++cnt;
 			else
@@ -289,7 +325,7 @@ signed char calculate_move() {
 		}
 		else {
 			int r = alphabeta(DEPTH, alpha, beta, false);
-			if (r  >= value) {
+            if (r  > value) {
 				value = r;
 				move = i;
 			}
@@ -354,9 +390,56 @@ void game_cycle(){
   }
 }
 
+void debug_game_cycle(){
+    bool turn= false;
+    while(true){
+
+
+      bool is_valid = false;
+      for(signed char i = 0; i<COLOMS; i++)
+          is_valid = is_valid || Connect4->validate_move(i);
+      if(!is_valid){
+          std::cout<<"IT'S A DRAW"<<std::endl;
+          break;
+      }
+
+      int move;
+      while(true){
+          std::cout<<"Enter your move:"<<std::endl;
+          std::string s;
+          std::cin >> s;
+          try{
+              move = std::stoi(s);
+              if(move < 1 || move >COLOMS || !Connect4->validate_move((signed char)(move-1)))
+                  throw std::invalid_argument("invalid move");
+               break;
+          }
+          catch(std::logic_error){
+              std::cout<<"invalid input"<<std::endl;
+              continue;
+          }
+      }
+      signed char colom = (signed char)move -1 ;
+      auto r = Connect4->do_move(turn,colom);
+      if( r == HUMAN){
+          std::cout<<"human won"<<std::endl;
+      }
+      else if (r == AI){
+          std::cout<<"AI won"<<std::endl;
+      }
+      Connect4->print_board();
+      std::cout<<"Heuristics: "<<Connect4->calculate_heuristics()<<std::endl;
+      std::cout<<"AI winning lines: "<<Connect4->count_win_lines_AI<<" Human winning lines: "<<Connect4->count_win_lines_HUMAN<<std::endl;
+      std::cout<<"AI threats:"<<Connect4->even_threat_AI+Connect4->odd_threat_AI<<std::endl;
+      std::cout<<"Human threats:"<<Connect4->even_threat_HUMAN+Connect4->odd_threat_HUMAN<<std::endl;
+      turn = !turn;
+    }
+}
+
 int main()
 {
     Connect4 = new game();
     game_cycle();
+   // debug_game_cycle();
     return 0;
 }
