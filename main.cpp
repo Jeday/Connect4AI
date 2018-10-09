@@ -5,7 +5,6 @@
 #include <string>
 #include <stdexcept>
 
-
 #define ROWS 6
 #define COLOMS 7
 #define AI 1
@@ -114,7 +113,7 @@ public:
 		return (board[board_size - COLOMS + colom] == NONE);
 	} 
 
-    int calculate_heuristics(){// высчитывает эвристику для текущего располжения доски
+    int calculate_heuristics(){              // высчитывает эвристику для текущего располжения доски
          count_win_lines_AI =0;
          count_win_lines_HUMAN = 0;
           even_threat_AI = 0;
@@ -241,8 +240,9 @@ public:
 		}
 		board[i * COLOMS + colom] = NONE;
 	}   
-    void print_board(){
+    void print_board(){              
         for(int i = ROWS-1; i>=0;--i){
+			std::cout << "|";
             for(int j = 0; j<COLOMS; ++j){
                 char c;
                 switch ( board[i*COLOMS+j]) {
@@ -257,20 +257,19 @@ public:
                      c = 'O';
                     break;
                 }
-                std::cout<<"|"<<c<<"|";
+                std::cout<<c<<"|";
             }
            std::cout<<std::endl;
 
         }
+		std::cout << "|";
         for(int j = 0; j<COLOMS; ++j)
-            std::cout<<"|"<<j+1<<"|";
+            std::cout<<j+1<<"|";
         std::cout<<std::endl;
-    } // КРАСИВО печатает доску на консоль
+    } 
 };
 
 game * Connect4;
-
-
 
 int alphabeta(int depth, int alpha, int beta, bool our_move) {
 	if (depth == 0)
@@ -362,7 +361,7 @@ void game_cycle(){
     int move;
     while(true){
         Connect4->print_board();
-        std::cout<<"Enter your move:"<<std::endl;
+        std::cout<<"Enter your move: "<<std::endl;
         std::string s;
         std::cin >> s;
         try{
@@ -376,6 +375,7 @@ void game_cycle(){
             continue;
         }
     }
+
     signed char colom = (signed char)move -1 ;
     if( Connect4->do_move(false,colom) == HUMAN){
         Connect4->print_board();
@@ -383,6 +383,8 @@ void game_cycle(){
         break;
     }
     Connect4->print_board();
+
+	std::cout << "AI is thinking...." << std::endl;
 
     colom = calculate_move();
     if(colom == -1){
@@ -449,6 +451,6 @@ int main()
 {
     Connect4 = new game();
     game_cycle();
-   // debug_game_cycle();
+	system("pause");
     return 0;
 }
